@@ -5,7 +5,7 @@ This repository is an implementation of test-time training for few-shot learning
 ## Repository Structure
 
 ```
-TTT/
+Fewshot-TTT/
 ├── external/
 │   ├── BIG-Bench-Hard/          # Submodule for BIG-Bench Hard tasks
 │   └── torchtune/               # Submodule for adamzweiger's Torchtune
@@ -38,7 +38,7 @@ To ensure that the external submodules are included, clone the repository using 
 
 ```bash
 git clone --recurse-submodules https://github.com/adamzweiger/Fewshot-TTT.git
-cd TTT
+cd Fewshot-TTT
 ```
 
 **Alternatively**, if you've already cloned the repository without submodules, initialize and update them manually:
