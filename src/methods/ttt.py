@@ -222,7 +222,7 @@ def create_torchtune_config(
 
 def finetune_with_torchtune(config_filename: str):
     """
-    Run the torchtune finetuning command.
+    Run the torchtune finetuning command fixed.
     """
     cmd = f"tune lora_finetune_single_device --config {config_filename}"
     print("Running command:", cmd)
