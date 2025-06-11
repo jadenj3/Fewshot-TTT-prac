@@ -10,9 +10,7 @@
 # ====================
 # Environment Setup
 # ====================
-export HOME=/data/cl/u/adamz
-source ~/.bashrc
-conda activate tttenv
+export HOME=/home/ubuntu
 cd ~/Fewshot-TTT
 
 # -------------------------------------------------------------------------
