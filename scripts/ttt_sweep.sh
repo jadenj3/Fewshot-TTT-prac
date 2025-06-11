@@ -11,7 +11,7 @@
 # Environment Setup
 # ====================
 export HOME=/home/ubuntu
-cd ~/Fewshot-TTT
+cd ~/Fewshot-TTT-prac
 
 # -------------------------------------------------------------------------
 # Fixed parameters
