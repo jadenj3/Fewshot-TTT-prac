@@ -22,7 +22,7 @@ LORA_DROPOUT=0.05
 
 DATE=$(date +"%Y%m%d")
 LOG_DIR="logs/current"
-MODEL_DIR="${HOME}/Models/Llama-3.1-8B-Instruct"
+MODEL_DIR="${HOME}/Fewshot-TTT-prac/meta-llama/Meta-Llama-3.1-8B-Instruct"
 DATASET_TYPE="masked_inputs_text_completion_dataset" # all outputs
 # DATASET_TYPE="text_completion_dataset" # all inputs and outputs
 # DATASET_TYPE="masked_text_completion_dataset" # last output
