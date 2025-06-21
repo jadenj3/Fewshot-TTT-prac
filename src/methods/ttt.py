@@ -440,7 +440,7 @@ def main():
     # Initialize LLM for evaluation with LoRA enabled
     llm_eval = LLM(
         model=args.model_dir,
-        gpu_memory_utilization=0.7,
+        gpu_memory_utilization=0.6,
         enable_lora=True,
         max_model_len=4096,
         max_lora_rank=args.lora_rank,
