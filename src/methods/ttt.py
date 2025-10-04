@@ -74,7 +74,7 @@ def create_ttt_dataset(
     with open(dataset_filename, 'w') as f:
         json.dump(data_samples, f)
 
-
+3
 def build_inference_prompt(
     correct_examples: list,
     leave_one_out: bool = False,
@@ -445,7 +445,7 @@ def main():
         model=args.model_dir,
         gpu_memory_utilization=0.6,
         enable_lora=True,
-        max_model_len=4096,
+        max_model_len=8192,
         max_lora_rank=args.lora_rank,
     )
 
