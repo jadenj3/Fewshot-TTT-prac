@@ -74,7 +74,6 @@ def create_ttt_dataset(
     with open(dataset_filename, 'w') as f:
         json.dump(data_samples, f)
 
-3
 def build_inference_prompt(
     correct_examples: list,
     leave_one_out: bool = False,
@@ -400,6 +399,13 @@ def main():
                 dataset_filename=dataset_filename,
                 shuffle_examples=args.shuffle
             )
+
+            # Print the training dataset that was just created
+            print(f"\n=== Training Dataset for {task_name} ===")
+            with open(dataset_filename, 'r') as f:
+                training_data = json.load(f)
+                print(json.dumps(training_data, indent=2))
+            print(f"=== End Training Dataset for {task_name} ===\n")
 
             # Create Torchtune config
             config_filename = create_torchtune_config(
