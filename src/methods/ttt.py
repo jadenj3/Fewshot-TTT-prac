@@ -300,6 +300,7 @@ def main():
             continue
 
         print(f"all_examples in task_json: {all_examples}")
+        print("/n")
 
         # Shuffle all examples with the chosen seed
         random.seed(args.seed)
