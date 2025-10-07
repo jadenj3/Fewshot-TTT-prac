@@ -339,23 +339,32 @@ def main():
 
         # Add custom training examples for dyck_languages
         if task_name == "dyck_languages":
-            custom_train_file = "custom_dyck_training2.json"
-            if os.path.exists(custom_train_file):
-                print(f"[TTT] Adding custom training data for {task_name} from {custom_train_file}")
-                try:
-                    with open(custom_train_file, "r") as f:
-                        custom_train_json = json.load(f)
-                    custom_train_examples = custom_train_json.get("examples", [])
+            # Toggle between custom examples or repeating original examples
+            USE_CUSTOM_FILE = False  # Set to True to use custom_dyck_training2.json, False to repeat original examples
 
-                    # Add all custom examples to correct_examples
-                    for ex in custom_train_examples:
-                        q = ex["input"]
-                        a = ex["target"]
-                        correct_examples.append((q, a))
+            if USE_CUSTOM_FILE:
+                custom_train_file = "custom_dyck_training2.json"
+                if os.path.exists(custom_train_file):
+                    print(f"[TTT] Adding custom training data for {task_name} from {custom_train_file}")
+                    try:
+                        with open(custom_train_file, "r") as f:
+                            custom_train_json = json.load(f)
+                        custom_train_examples = custom_train_json.get("examples", [])
 
-                    print(f"[TTT] Added {len(custom_train_examples)} custom examples to training set (total: {len(correct_examples)} examples)")
-                except Exception as e:
-                    print(f"[TTT] Error loading custom training data: {e}")
+                        # Add all custom examples to correct_examples
+                        for ex in custom_train_examples:
+                            q = ex["input"]
+                            a = ex["target"]
+                            correct_examples.append((q, a))
+
+                        print(f"[TTT] Added {len(custom_train_examples)} custom examples to training set (total: {len(correct_examples)} examples)")
+                    except Exception as e:
+                        print(f"[TTT] Error loading custom training data: {e}")
+            else:
+                # Repeat original examples to match custom example count
+                original_count = len(correct_examples)
+                correct_examples = correct_examples * 3  # Repeat 3 times to get 30 total (10 × 3)
+                print(f"[TTT] Repeated {original_count} original examples 3x for total of {len(correct_examples)} examples")
 
         # Convert eval data to separate question list and target list
         eval_questions = [e["question"] for e in eval_data]
