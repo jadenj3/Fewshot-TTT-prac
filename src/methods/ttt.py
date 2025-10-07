@@ -340,7 +340,7 @@ def main():
         # Add custom training examples for dyck_languages
         if task_name == "dyck_languages":
             # Toggle between custom examples or repeating original examples
-            USE_CUSTOM_FILE = False  # Set to True to use custom_dyck_training2.json, False to repeat original examples
+            USE_CUSTOM_FILE = True  # Set to True to use custom_dyck_training2.json, False to repeat original examples
 
             if USE_CUSTOM_FILE:
                 custom_train_file = "custom_dyck_training2.json"
