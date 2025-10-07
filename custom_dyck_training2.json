@@ -79,6 +79,46 @@
     {
       "input": "( [ { < ( [ {",
       "target": "} ] ) > } ] )"
+    },
+    {
+      "input": "((([]{}))((()))))",
+      "target": "INCORRECT: ((([]{}))((()])))"
+    },
+    {
+      "input": "{[(])}",
+      "target": "INCORRECT: {[)}]"
+    },
+    {
+      "input": "([(])",
+      "target": "INCORRECT: (]"
+    },
+    {
+      "input": "[{(())[{}}]]",
+      "target": "INCORRECT: [{(())[{}}]]"
+    },
+    {
+      "input": "([(])",
+      "target": "INCORRECT: (]"
+    },
+    {
+      "input": "{[(])}",
+      "target": "INCORRECT: {[)}]"
+    },
+    {
+      "input": "[{(())[{}}]]",
+      "target": "INCORRECT: [{(())[{}}]]"
+    },
+    {
+      "input": "[((]",
+      "target": "INCORRECT: [((]]"
+    },
+    {
+      "input": "[{(())[{}}]]",
+      "target": "INCORRECT: [{(())[{}}]]"
+    },
+    {
+      "input": "[{[()]}]",
+      "target": "INCORRECT: [{[()]}]"
     }
   ]
 }
