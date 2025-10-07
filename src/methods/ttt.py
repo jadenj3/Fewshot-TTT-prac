@@ -415,6 +415,7 @@ def main():
             dataset_filename = os.path.join(data_dict["output_dir"], f"{task_name}_ttt_dataset.json")
 
             print(f"correct examples before finetuning: {len(correct_examples)}")
+            print(correct_examples)
 
             # Build the multi-sample dataset with num_training_steps random shuffles
             create_ttt_dataset(
