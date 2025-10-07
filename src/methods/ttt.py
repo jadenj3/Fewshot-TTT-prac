@@ -339,7 +339,7 @@ def main():
 
         # Add custom training examples for dyck_languages
         if task_name == "dyck_languages":
-            custom_train_file = "custom_dyck_training.json"
+            custom_train_file = "custom_dyck_training2.json"
             if os.path.exists(custom_train_file):
                 print(f"[TTT] Adding custom training data for {task_name} from {custom_train_file}")
                 try:
