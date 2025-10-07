@@ -343,7 +343,7 @@ def main():
             USE_CUSTOM_FILE = True  # Set to True to use custom_dyck_training2.json, False to repeat original examples
 
             if USE_CUSTOM_FILE:
-                custom_train_file = "custom_dyck_training3.json"
+                custom_train_file = "custom_dyck_training_llama.json"
                 if os.path.exists(custom_train_file):
                     print(f"[TTT] Adding custom training data for {task_name} from {custom_train_file}")
                     try:
