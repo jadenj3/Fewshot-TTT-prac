@@ -400,7 +400,7 @@ def main():
             if task_name != "dyck_languages":
                 continue
             correct_examples = data_dict["correct_examples"]
-            print(f"correct_examples: {correct_examples}")
+            #print(f"correct_examples: {correct_examples}")
             if not correct_examples:
                 print(f"[PHASE 2] No correct examples for {task_name}. Skipping finetune.")
                 ft_times[task_name] = 0.0
@@ -413,6 +413,8 @@ def main():
             )
 
             dataset_filename = os.path.join(data_dict["output_dir"], f"{task_name}_ttt_dataset.json")
+
+            print(f"correct examples before finetuning: {len(correct_examples)}")
 
             # Build the multi-sample dataset with num_training_steps random shuffles
             create_ttt_dataset(
