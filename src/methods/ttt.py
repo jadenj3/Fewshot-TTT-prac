@@ -298,8 +298,8 @@ def main():
             print(f"[TTT] Skipping {task_name} because no examples found in JSON.")
             continue
 
-        print(f"all_examples in task_json: {all_examples}")
-        print("/n")
+        #print(f"all_examples in task_json: {all_examples}")
+        #print("/n")
 
         # Shuffle all examples with the chosen seed
         random.seed(args.seed)
