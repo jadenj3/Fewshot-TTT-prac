@@ -377,7 +377,10 @@ def main():
     else:
         print("=== PHASE 2: Multi-sample LoRA Finetuning ===")
         for task_name, data_dict in task_dict.items():
+            if task_name != "dyck_languages":
+                continue
             correct_examples = data_dict["correct_examples"]
+            print(f"correct_examples: {correct_examples}")
             if not correct_examples:
                 print(f"[PHASE 2] No correct examples for {task_name}. Skipping finetune.")
                 ft_times[task_name] = 0.0
@@ -401,11 +404,12 @@ def main():
             )
 
             # Print the training dataset that was just created
+            '''
             print(f"\n=== Training Dataset for {task_name} ===")
             with open(dataset_filename, 'r') as f:
                 training_data = json.load(f)
                 print(json.dumps(training_data, indent=2))
-            print(f"=== End Training Dataset for {task_name} ===\n")
+            print(f"=== End Training Dataset for {task_name} ===\n")'''
 
             # Create Torchtune config
             config_filename = create_torchtune_config(
@@ -459,6 +463,8 @@ def main():
     lora_id = 1
 
     for task_name, data_dict in task_dict.items():
+        if task_name != "dyck_languages":
+            continue
         generation_length = data_dict["generation_length"]
         answer_format = data_dict["answer_format"]
         task_prompt = data_dict["task_prompt"]
