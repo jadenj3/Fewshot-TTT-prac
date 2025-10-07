@@ -1,123 +1,123 @@
 {
   "examples": [
     {
-      "input": "( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ {",
       "target": "} ] )"
     },
     {
-      "input": "( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ {",
       "target": "} ] )"
     },
     {
-      "input": "( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ {",
       "target": "} ] )"
     },
     {
-      "input": "( [ { < ( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ { < ( [ {",
       "target": "} ] ) > } ] )"
     },
     {
-      "input": "( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ {",
       "target": "} ] )"
     },
     {
-      "input": "( [ { < ( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ { < ( [ {",
       "target": "} ] ) > } ] )"
     },
     {
-      "input": "( [ { < ( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ { < ( [ {",
       "target": "} ] ) > } ] )"
     },
     {
-      "input": "( [ { < ( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ { < ( [ {",
       "target": "} ] ) > } ] )"
     },
     {
-      "input": "( [ { < ( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ { < ( [ {",
       "target": "} ] ) > } ] )"
     },
     {
-      "input": "( [ { < ( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ { < ( [ {",
       "target": "} ] ) > } ] )"
     },
     {
-      "input": "( [ { < ( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ { < ( [ {",
       "target": "} ] ) > } ] )"
     },
     {
-      "input": "( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ {",
       "target": "} ] )"
     },
     {
-      "input": "( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ {",
       "target": "} ] )"
     },
     {
-      "input": "([{<",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ([{<",
       "target": ">}])"
     },
     {
-      "input": "( [ { < ( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ { < ( [ {",
       "target": "} ] ) > } ] )"
     },
     {
-      "input": "( [ { < ( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ { < ( [ {",
       "target": "} ] ) > } ] )"
     },
     {
-      "input": "([{<",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ([{<",
       "target": ">}])"
     },
     {
-      "input": "([{<",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ([{<",
       "target": ">}])"
     },
     {
-      "input": "( [ { < ( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ { < ( [ {",
       "target": "} ] ) > } ] )"
     },
     {
-      "input": "( [ { < ( [ {",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ( [ { < ( [ {",
       "target": "} ] ) > } ] )"
     },
     {
-      "input": "((([]{}))((()))))",
-      "target": "INCORRECT: ((([]{}))((()])))"
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ((([]{}))((()))))",
+      "target": "INCORRECT: ((([]{}))((()]]))"
     },
     {
-      "input": "{[(])}",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: {[(])}",
       "target": "INCORRECT: {[)}]"
     },
     {
-      "input": "([(])",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ([(])",
       "target": "INCORRECT: (]"
     },
     {
-      "input": "[{(())[{}}]]",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [{(())[{}}]]",
       "target": "INCORRECT: [{(())[{}}]]"
     },
     {
-      "input": "([(])",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ([(])",
       "target": "INCORRECT: (]"
     },
     {
-      "input": "{[(])}",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: {[(])}",
       "target": "INCORRECT: {[)}]"
     },
     {
-      "input": "[{(())[{}}]]",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [{(())[{}}]]",
       "target": "INCORRECT: [{(())[{}}]]"
     },
     {
-      "input": "[((]",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [((]",
       "target": "INCORRECT: [((]]"
     },
     {
-      "input": "[{(())[{}}]]",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [{(())[{}}]]",
       "target": "INCORRECT: [{(())[{}}]]"
     },
     {
-      "input": "[{[()]}]",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: [{[()]}]",
       "target": "INCORRECT: [{[()]}]"
     }
   ]

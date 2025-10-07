@@ -1,83 +1,83 @@
 {
   "examples": [
     {
-      "input": "((a + b) * (c - d) + (e * (f + g))",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ((a + b) * (c - d) + (e * (f + g))",
       "target": ")))))"
     },
     {
-      "input": "((a + b) * (c - d) + (e * (f + g))",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ((a + b) * (c - d) + (e * (f + g))",
       "target": ")))))"
     },
     {
-      "input": "((a + b) * (c - d) + (e * (f + g))",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ((a + b) * (c - d) + (e * (f + g))",
       "target": ")))))"
     },
     {
-      "input": "((((((()))((()))))((()))))",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ((((((()))((()))))((()))))",
       "target": ")))))))"
     },
     {
-      "input": "((a + b) * (c - d) + (e * (f + g))",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ((a + b) * (c - d) + (e * (f + g))",
       "target": ")))))"
     },
     {
-      "input": "((a + b) * (c - d) + (e * (f + g))",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ((a + b) * (c - d) + (e * (f + g))",
       "target": ")))))"
     },
     {
-      "input": "((((((()))((()))))((()))))",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ((((((()))((()))))((()))))",
       "target": ")))))))"
     },
     {
-      "input": "((a + b) * (c - d) + (e * (f + g))",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ((a + b) * (c - d) + (e * (f + g))",
       "target": ")))))"
     },
     {
-      "input": "(a + b) * (c + d",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: (a + b) * (c + d",
       "target": ")"
     },
     {
-      "input": "((((((()))((()))))((()))))",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ((((((()))((()))))((()))))",
       "target": ")))))))"
     },
     {
-      "input": "(a + b) * (c + d",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: (a + b) * (c + d",
       "target": ")"
     },
     {
-      "input": "(a + b) * (c + d",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: (a + b) * (c + d",
       "target": ")"
     },
     {
-      "input": "(a + b) * (c + d",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: (a + b) * (c + d",
       "target": ")"
     },
     {
-      "input": "((((((()))((()))))((()))))",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ((((((()))((()))))((()))))",
       "target": ")))))))"
     },
     {
-      "input": "(a + b) * (c + d",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: (a + b) * (c + d",
       "target": ")"
     },
     {
-      "input": "((((((()))((()))))((()))))",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ((((((()))((()))))((()))))",
       "target": ")))))))"
     },
     {
-      "input": "(a + b) * (c + d",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: (a + b) * (c + d",
       "target": ")"
     },
     {
-      "input": "((((((()))((()))))((()))))",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: ((((((()))((()))))((()))))",
       "target": ")))))))"
     },
     {
-      "input": "(a + b) * (c + d",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: (a + b) * (c + d",
       "target": ")"
     },
     {
-      "input": "(a + b) * (c + d",
+      "input": "Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: (a + b) * (c + d",
       "target": ")"
     }
   ]
