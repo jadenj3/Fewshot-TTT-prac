@@ -337,6 +337,26 @@ def main():
             a = ex["answer"]
             correct_examples.append((q, a))
 
+        # Add custom training examples for dyck_languages
+        if task_name == "dyck_languages":
+            custom_train_file = "custom_dyck_training.json"
+            if os.path.exists(custom_train_file):
+                print(f"[TTT] Adding custom training data for {task_name} from {custom_train_file}")
+                try:
+                    with open(custom_train_file, "r") as f:
+                        custom_train_json = json.load(f)
+                    custom_train_examples = custom_train_json.get("examples", [])
+
+                    # Add all custom examples to correct_examples
+                    for ex in custom_train_examples:
+                        q = ex["input"]
+                        a = ex["target"]
+                        correct_examples.append((q, a))
+
+                    print(f"[TTT] Added {len(custom_train_examples)} custom examples to training set (total: {len(correct_examples)} examples)")
+                except Exception as e:
+                    print(f"[TTT] Error loading custom training data: {e}")
+
         # Convert eval data to separate question list and target list
         eval_questions = [e["question"] for e in eval_data]
         eval_targets   = [e["answer"]   for e in eval_data]
