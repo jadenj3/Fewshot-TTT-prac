@@ -312,7 +312,7 @@ def main():
 
         # The first k become the training set ("correct_examples")
         train_data = []
-        for ex in all_examples[:args.k] :
+        for ex in all_examples[:args.k]:
             q = ex["input"]
             a = ex["target"]
             # We'll store these for finetuning in the same format as "train" was before
