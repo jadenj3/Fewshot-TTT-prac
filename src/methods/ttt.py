@@ -414,10 +414,19 @@ def generate_data(
     examples_eval = correct_examples[split_idx:]
 
     print(f"[generate_data] Split {len(correct_examples)} examples into {len(examples_train)} train, {len(examples_eval)} eval")
+    print(f"[generate_data] Task: {task_metadata['task_prompt'][:50]}...")
+    print(f"[generate_data] Format: {task_metadata['answer_format']}")
 
     # TODO: Generate synthetic examples with DSPy or other method
-    # For now, just use the training examples
-    # generated_examples = generate_synthetic_examples(examples_train, num_generation_steps)
+    # When implementing, use task_metadata['task_prompt'] and task_metadata['answer_format']
+    # to ensure synthetic examples follow the correct format
+    # Example:
+    # generated_examples = generate_synthetic_examples(
+    #     examples_train,
+    #     num_generation_steps,
+    #     task_prompt=task_metadata['task_prompt'],
+    #     answer_format=task_metadata['answer_format']
+    # )
     # examples_train_augmented = examples_train + generated_examples
     examples_train_augmented = examples_train
 
