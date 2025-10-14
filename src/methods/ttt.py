@@ -11,6 +11,8 @@ Implements the main TTT (Test-Time Training) method.
 """
 
 import os
+# CRITICAL: Set this BEFORE importing torch to force immediate memory release
+os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
 import sys
 import json
 import time
@@ -347,13 +349,27 @@ def train_and_evaluate_on_subset(
     # Cleanup LLM if we created it
     if cleanup_llm:
         del llm
-        import time
+
+        # CRITICAL: Shutdown Ray to release vLLM memory
+        try:
+            import ray
+            if ray.is_initialized():
+                print("[train_and_evaluate_on_subset] Shutting down Ray...")
+                ray.shutdown()
+                time.sleep(3)
+        except Exception as e:
+            print(f"[train_and_evaluate_on_subset] Ray shutdown warning: {e}")
+
         gc.collect()
         torch.cuda.empty_cache()
         torch.cuda.synchronize()
-        time.sleep(2)  # Longer wait to ensure vLLM fully releases
-        gc.collect()
-        torch.cuda.empty_cache()
+        time.sleep(3)
+
+        # Multiple garbage collection passes
+        for _ in range(3):
+            gc.collect()
+            time.sleep(1)
+            torch.cuda.empty_cache()
 
     return eval_accuracy, eval_predictions
 
@@ -621,60 +637,80 @@ def main():
             if args.test_synthetic_data and task_name == "dyck_languages":
                 print("\n=== SYNTHETIC DATA EXPERIMENT ===")
 
-                # Prepare config dicts for generate_data
-                lora_config = {
-                    'lr': args.lr,
-                    'lora_rank': args.lora_rank,
-                    'lora_alpha': args.lora_alpha,
-                    'lora_dropout': args.lora_dropout,
-                    'batch_size': args.batch_size,
-                    'epochs': args.epochs
-                }
+                import subprocess
+                import sys as sys_module
 
-                task_metadata = {
-                    'task_prompt': data_dict['task_prompt'],
-                    'answer_format': data_dict['answer_format'],
-                    'generation_length': data_dict['generation_length']
-                }
-
+                # Create a separate script that runs the synthetic experiment
+                synthetic_script = "/tmp/run_synthetic_experiment.py"
                 synthetic_output_dir = f"/tmp/{task_name}_synthetic_experiment"
 
-                try:
-                    synthetic_acc, synthetic_preds = generate_data(
-                        correct_examples=correct_examples,
-                        model_dir=args.model_dir,
-                        output_dir=synthetic_output_dir,
-                        task_metadata=task_metadata,
-                        num_training_steps=args.num_training_steps,
-                        num_generation_steps=args.num_synthetic_examples,
-                        lora_config=lora_config,
-                        llm=None  # Will create its own LLM
-                    )
-                    print(f"[SYNTHETIC EXPERIMENT] Accuracy: {synthetic_acc:.2f}%")
-                    print(f"[SYNTHETIC EXPERIMENT] Sample predictions: {synthetic_preds[:3]}")
-                except Exception as e:
-                    print(f"[SYNTHETIC EXPERIMENT] Failed: {e}")
-                    import traceback
-                    traceback.print_exc()
+                # Escape strings for Python code
+                task_prompt_escaped = data_dict['task_prompt'].replace("'", "\\'")
+                answer_format_escaped = data_dict['answer_format'].replace("'", "\\'")
 
-                # Aggressive cleanup to free GPU memory
-                print("[SYNTHETIC EXPERIMENT] Cleaning up GPU memory...")
-                import time
-                gc.collect()
-                torch.cuda.empty_cache()
-                torch.cuda.synchronize()
-                time.sleep(3)  # Give GPU time to fully release vLLM resources
-                gc.collect()
-                torch.cuda.empty_cache()
+                # Write the subprocess script
+                with open(synthetic_script, 'w') as f:
+                    f.write(f"""#!/usr/bin/env python3
+import sys
+import os
+os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+sys.path.insert(0, '{os.getcwd()}')
 
-                # Check memory after cleanup
-                if torch.cuda.is_available():
-                    free_mem = torch.cuda.mem_get_info()[0] / 1024**3
-                    print(f"[SYNTHETIC EXPERIMENT] GPU memory after cleanup: {free_mem:.2f}GB free")
+from src.methods.ttt import generate_data
 
-                # Clean up synthetic experiment directory
+lora_config = {{
+    'lr': {args.lr},
+    'lora_rank': {args.lora_rank},
+    'lora_alpha': {args.lora_alpha},
+    'lora_dropout': {args.lora_dropout},
+    'batch_size': {args.batch_size},
+    'epochs': {args.epochs}
+}}
+
+task_metadata = {{
+    'task_prompt': '{task_prompt_escaped}',
+    'answer_format': '{answer_format_escaped}',
+    'generation_length': {data_dict['generation_length']}
+}}
+
+correct_examples = {repr(correct_examples)}
+
+synthetic_acc, synthetic_preds = generate_data(
+    correct_examples=correct_examples,
+    model_dir='{args.model_dir}',
+    output_dir='{synthetic_output_dir}',
+    task_metadata=task_metadata,
+    num_training_steps={args.num_training_steps},
+    num_generation_steps={args.num_synthetic_examples},
+    lora_config=lora_config,
+    llm=None
+)
+
+print(f"[SYNTHETIC] Final Accuracy: {{synthetic_acc:.2f}}%")
+print(f"[SYNTHETIC] Sample predictions: {{synthetic_preds[:3]}}")
+""")
+
+                # Run in subprocess - memory will be completely freed when it exits
+                print("[SYNTHETIC EXPERIMENT] Running in isolated subprocess...")
+                result = subprocess.run([sys_module.executable, synthetic_script],
+                                      capture_output=False,
+                                      text=True)
+
+                # Cleanup
+                if os.path.exists(synthetic_script):
+                    os.remove(synthetic_script)
                 if os.path.exists(synthetic_output_dir):
                     shutil.rmtree(synthetic_output_dir)
+
+                # Wait for GPU to be fully released
+                print("[SYNTHETIC EXPERIMENT] Waiting for GPU memory to be released...")
+                time.sleep(5)
+
+                # Verify memory is free
+                if torch.cuda.is_available():
+                    free_mem = torch.cuda.mem_get_info()[0] / 1024**3
+                    total_mem = torch.cuda.mem_get_info()[1] / 1024**3
+                    print(f"[SYNTHETIC EXPERIMENT] GPU memory after subprocess exit: {free_mem:.2f}GB free / {total_mem:.2f}GB total")
 
                 print("=== END SYNTHETIC DATA EXPERIMENT ===\n")
 
