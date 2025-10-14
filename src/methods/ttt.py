@@ -347,7 +347,7 @@ def train_and_evaluate_on_subset(
         task_prompt=task_metadata['task_prompt'],
         answer_format=task_metadata['answer_format'],
         few_shot_prompt_prefix=few_shot_prefix,  # Include in-context examples like main loop
-        lora_request=lora_request
+        lora_request=None
     )
 
     # Compute accuracy
