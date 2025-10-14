@@ -11,8 +11,6 @@ Implements the main TTT (Test-Time Training) method.
 """
 
 import os
-# CRITICAL: Set this BEFORE importing torch to force immediate memory release
-os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
 import sys
 import json
 import time
@@ -231,222 +229,6 @@ def finetune_with_torchtune(config_filename: str):
     if ret != 0:
         print(f"[TTT] Torchtune command failed with config: {config_filename}")
 
-def train_and_evaluate_on_subset(
-    examples_train,
-    examples_eval,
-    model_dir,
-    output_dir,
-    task_metadata,
-    num_training_steps,
-    lora_config,
-    llm=None,
-    lora_id=1
-):
-    """
-    Complete train/eval cycle for testing data generation strategies.
-
-    Args:
-        examples_train: List of (question, answer) tuples for training
-        examples_eval: List of (question, answer) tuples for evaluation
-        model_dir: Path to base model
-        output_dir: Directory to save LoRA adapter
-        task_metadata: Dict with 'task_prompt', 'answer_format', 'generation_length'
-        num_training_steps: Number of training samples to create (with shuffling)
-        lora_config: Dict with 'lr', 'lora_rank', 'lora_alpha', 'lora_dropout', 'batch_size', 'epochs'
-        llm: Optional pre-initialized vLLM instance (for efficiency)
-        lora_id: Unique ID for this LoRA adapter
-
-    Returns:
-        eval_accuracy: Accuracy on eval subset
-        eval_predictions: Model predictions on eval subset
-    """
-    # Create output directory
-    if os.path.exists(output_dir):
-        shutil.rmtree(output_dir)
-    os.makedirs(output_dir, exist_ok=True)
-
-    # 1. Create training dataset
-    dataset_filename = os.path.join(output_dir, "train_dataset.json")
-    prefix = f"{task_metadata['task_prompt']} {task_metadata['answer_format']}\n\n"
-
-    create_ttt_dataset(
-        prefix=prefix,
-        correct_examples=examples_train,
-        num_training_steps=num_training_steps,
-        dataset_filename=dataset_filename,
-        shuffle_examples=True
-    )
-
-    # 2. Train LoRA adapter
-    config_filename = create_torchtune_config(
-        model_dir=model_dir,
-        dataset_type="text_completion_dataset",
-        task="synthetic_test",
-        dataset_filename=dataset_filename,
-        output_dir=output_dir,
-        batch_size=lora_config['batch_size'],
-        epochs=lora_config['epochs'],
-        lr=lora_config['lr'],
-        lora_rank=lora_config['lora_rank'],
-        lora_alpha=lora_config['lora_alpha'],
-        lora_dropout=lora_config['lora_dropout']
-    )
-
-    finetune_with_torchtune(config_filename)
-
-    # CRITICAL: Force GPU memory cleanup after Torchtune training
-    # Torchtune runs in subprocess but CUDA memory persists
-    print("[train_and_evaluate_on_subset] Forcing GPU memory cleanup after training...")
-    gc.collect()
-    torch.cuda.empty_cache()
-    torch.cuda.synchronize()
-    time.sleep(2)  # Give GPU more time to fully release
-
-    # Cleanup training files
-    if os.path.exists(dataset_filename):
-        os.remove(dataset_filename)
-    if os.path.exists(config_filename):
-        os.remove(config_filename)
-
-    # 3. Format eval examples
-    eval_questions = [q for q, a in examples_eval]
-    eval_targets = [a for q, a in examples_eval]
-
-    # 4. Evaluate with LoRA adapter
-    # Initialize LLM if not provided
-    cleanup_llm = False
-    if llm is None:
-        llm = LLM(
-            model=model_dir,
-            gpu_memory_utilization=0.6,  # Needs enough for KV cache
-            enable_lora=True,
-            max_model_len=8192,
-            max_lora_rank=lora_config['lora_rank'],
-        )
-        cleanup_llm = True
-
-    # Create LoRA request
-    lora_request = LoRARequest(
-        lora_name=f"synthetic_test_adapter_{lora_id}",
-        lora_int_id=lora_id,
-        lora_path=output_dir
-    )
-
-    # Build few-shot prompt from training examples (same as main loop)
-    few_shot_prefix = build_inference_prompt(
-        correct_examples=examples_train,
-        leave_one_out=False,
-        shuffle_examples=False
-    )
-
-    # Run inference
-    eval_predictions = inference_vllm(
-        llm=llm,
-        prompts=eval_questions,
-        max_new_tokens=task_metadata['generation_length'],
-        task_prompt=task_metadata['task_prompt'],
-        answer_format=task_metadata['answer_format'],
-        few_shot_prompt_prefix=few_shot_prefix,  # Include in-context examples like main loop
-        lora_request=None
-    )
-
-    # Compute accuracy
-    eval_accuracy = compute_accuracy(eval_predictions, eval_targets)
-
-    # Cleanup LLM if we created it
-    if cleanup_llm:
-        del llm
-
-        # CRITICAL: Shutdown Ray to release vLLM memory
-        try:
-            import ray
-            if ray.is_initialized():
-                print("[train_and_evaluate_on_subset] Shutting down Ray...")
-                ray.shutdown()
-                time.sleep(3)
-        except Exception as e:
-            print(f"[train_and_evaluate_on_subset] Ray shutdown warning: {e}")
-
-        gc.collect()
-        torch.cuda.empty_cache()
-        torch.cuda.synchronize()
-        time.sleep(3)
-
-        # Multiple garbage collection passes
-        for _ in range(3):
-            gc.collect()
-            time.sleep(1)
-            torch.cuda.empty_cache()
-
-    return eval_accuracy, eval_predictions
-
-
-def generate_data(
-    correct_examples,
-    model_dir,
-    output_dir,
-    task_metadata,
-    num_training_steps,
-    num_generation_steps,
-    lora_config,
-    llm=None
-):
-    """
-    Experimental function for testing synthetic data generation strategies.
-
-    Args:
-        correct_examples: List of (question, answer) tuples
-        model_dir: Path to base model
-        output_dir: Directory to save LoRA adapter
-        task_metadata: Dict with 'task_prompt', 'answer_format', 'generation_length'
-        num_training_steps: Number of training samples to create (with shuffling)
-        num_generation_steps: Number of synthetic examples to generate
-        lora_config: Dict with 'lr', 'lora_rank', 'lora_alpha', 'lora_dropout', 'batch_size', 'epochs'
-        llm: Optional pre-initialized vLLM instance (for efficiency)
-
-    Returns:
-        eval_accuracy: Accuracy on the eval subset
-        eval_predictions: Model predictions on eval subset
-    """
-    # Split into train/eval for testing data generation strategies
-    split_idx = len(correct_examples) // 2
-    examples_train = correct_examples[:split_idx]
-    examples_eval = correct_examples[split_idx:]
-
-    print(f"[generate_data] Split {len(correct_examples)} examples into {len(examples_train)} train, {len(examples_eval)} eval")
-    print(f"[generate_data] Task: {task_metadata['task_prompt'][:50]}...")
-    print(f"[generate_data] Format: {task_metadata['answer_format']}")
-
-    # TODO: Generate synthetic examples with DSPy or other method
-    # When implementing, use task_metadata['task_prompt'] and task_metadata['answer_format']
-    # to ensure synthetic examples follow the correct format
-    # Example:
-    # generated_examples = generate_synthetic_examples(
-    #     examples_train,
-    #     num_generation_steps,
-    #     task_prompt=task_metadata['task_prompt'],
-    #     answer_format=task_metadata['answer_format']
-    # )
-    # examples_train_augmented = examples_train + generated_examples
-    examples_train_augmented = examples_train
-
-    # Train and evaluate using the helper function
-    eval_accuracy, eval_predictions = train_and_evaluate_on_subset(
-        examples_train=examples_train_augmented,
-        examples_eval=examples_eval,
-        model_dir=model_dir,
-        output_dir=output_dir,
-        task_metadata=task_metadata,
-        num_training_steps=num_training_steps,
-        lora_config=lora_config,
-        llm=llm,
-        lora_id=1
-    )
-
-    print(f"[generate_data] Eval accuracy: {eval_accuracy:.2f}%")
-
-    return eval_accuracy, eval_predictions
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -486,10 +268,6 @@ def main():
                         help="LoRA dropout rate.")
     parser.add_argument("--seed", type=int, default=42,
                         help="Random seed for shuffling examples.")
-    parser.add_argument("--test_synthetic_data", type=lambda x: (str(x).lower() == 'true'), default=False,
-                        help="If True, run synthetic data generation experiment on dyck_languages before main training.")
-    parser.add_argument("--num_synthetic_examples", type=int, default=0,
-                        help="Number of synthetic examples to generate (currently unused, placeholder for future).")
     args = parser.parse_args()
 
     # -------------------------------------------------------------------------
@@ -559,7 +337,6 @@ def main():
             a = ex["answer"]
             correct_examples.append((q, a))
 
-
         # Add custom training examples for dyck_languages
         if task_name == "dyck_languages":
             # Toggle between custom examples or repeating original examples
@@ -586,7 +363,7 @@ def main():
             else:
                 # Repeat original examples to match custom example count
                 original_count = len(correct_examples)
-                correct_examples = correct_examples  # Repeat 3 times to get 30 total (10 × 3)
+                correct_examples = correct_examples * 3  # Repeat 3 times to get 30 total (10 × 3)
                 print(f"[TTT] Repeated {original_count} original examples 3x for total of {len(correct_examples)} examples")
 
         # Convert eval data to separate question list and target list
@@ -648,87 +425,6 @@ def main():
 
             print(f"correct examples before finetuning: {len(correct_examples)}")
             print(correct_examples)
-
-            # Optional: Test synthetic data generation experiment
-            if args.test_synthetic_data and task_name == "dyck_languages":
-                print("\n=== SYNTHETIC DATA EXPERIMENT ===")
-
-                import subprocess
-                import sys as sys_module
-
-                # Create a separate script that runs the synthetic experiment
-                synthetic_script = "/tmp/run_synthetic_experiment.py"
-                synthetic_output_dir = f"/tmp/{task_name}_synthetic_experiment"
-
-                # Escape strings for Python code
-                task_prompt_escaped = data_dict['task_prompt'].replace("'", "\\'")
-                answer_format_escaped = data_dict['answer_format'].replace("'", "\\'")
-
-                # Write the subprocess script
-                with open(synthetic_script, 'w') as f:
-                    f.write(f"""#!/usr/bin/env python3
-import sys
-import os
-os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
-sys.path.insert(0, '{os.getcwd()}')
-
-from src.methods.ttt import generate_data
-
-lora_config = {{
-    'lr': {args.lr},
-    'lora_rank': {args.lora_rank},
-    'lora_alpha': {args.lora_alpha},
-    'lora_dropout': {args.lora_dropout},
-    'batch_size': {args.batch_size},
-    'epochs': {args.epochs}
-}}
-
-task_metadata = {{
-    'task_prompt': '{task_prompt_escaped}',
-    'answer_format': '{answer_format_escaped}',
-    'generation_length': {data_dict['generation_length']}
-}}
-
-correct_examples = {repr(correct_examples)}
-
-synthetic_acc, synthetic_preds = generate_data(
-    correct_examples=correct_examples,
-    model_dir='{args.model_dir}',
-    output_dir='{synthetic_output_dir}',
-    task_metadata=task_metadata,
-    num_training_steps={args.num_training_steps},
-    num_generation_steps={args.num_synthetic_examples},
-    lora_config=lora_config,
-    llm=None
-)
-
-print(f"[SYNTHETIC] Final Accuracy: {{synthetic_acc:.2f}}%")
-print(f"[SYNTHETIC] Sample predictions: {{synthetic_preds[:3]}}")
-""")
-
-                # Run in subprocess - memory will be completely freed when it exits
-                print("[SYNTHETIC EXPERIMENT] Running in isolated subprocess...")
-                result = subprocess.run([sys_module.executable, synthetic_script],
-                                      capture_output=False,
-                                      text=True)
-
-                # Cleanup
-                if os.path.exists(synthetic_script):
-                    os.remove(synthetic_script)
-                if os.path.exists(synthetic_output_dir):
-                    shutil.rmtree(synthetic_output_dir)
-
-                # Wait for GPU to be fully released
-                print("[SYNTHETIC EXPERIMENT] Waiting for GPU memory to be released...")
-                time.sleep(5)
-
-                # Verify memory is free
-                if torch.cuda.is_available():
-                    free_mem = torch.cuda.mem_get_info()[0] / 1024**3
-                    total_mem = torch.cuda.mem_get_info()[1] / 1024**3
-                    print(f"[SYNTHETIC EXPERIMENT] GPU memory after subprocess exit: {free_mem:.2f}GB free / {total_mem:.2f}GB total")
-
-                print("=== END SYNTHETIC DATA EXPERIMENT ===\n")
 
             # Build the multi-sample dataset with num_training_steps random shuffles
             create_ttt_dataset(
