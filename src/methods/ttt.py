@@ -586,7 +586,7 @@ def main():
             else:
                 # Repeat original examples to match custom example count
                 original_count = len(correct_examples)
-                correct_examples = correct_examples * 3  # Repeat 3 times to get 30 total (10 × 3)
+                correct_examples = correct_examples  # Repeat 3 times to get 30 total (10 × 3)
                 print(f"[TTT] Repeated {original_count} original examples 3x for total of {len(correct_examples)} examples")
 
         # Convert eval data to separate question list and target list
