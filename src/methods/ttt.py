@@ -332,6 +332,13 @@ def train_and_evaluate_on_subset(
         lora_path=output_dir
     )
 
+    # Build few-shot prompt from training examples (same as main loop)
+    few_shot_prefix = build_inference_prompt(
+        correct_examples=examples_train,
+        leave_one_out=False,
+        shuffle_examples=False
+    )
+
     # Run inference
     eval_predictions = inference_vllm(
         llm=llm,
@@ -339,7 +346,7 @@ def train_and_evaluate_on_subset(
         max_new_tokens=task_metadata['generation_length'],
         task_prompt=task_metadata['task_prompt'],
         answer_format=task_metadata['answer_format'],
-        few_shot_prompt_prefix="",  # No in-context examples, just the adapter
+        few_shot_prompt_prefix=few_shot_prefix,  # Include in-context examples like main loop
         lora_request=lora_request
     )
 
