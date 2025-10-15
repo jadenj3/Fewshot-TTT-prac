@@ -229,6 +229,95 @@ def finetune_with_torchtune(config_filename: str):
     if ret != 0:
         print(f"[TTT] Torchtune command failed with config: {config_filename}")
 
+def generate_data(data_dict, num_training_steps, args):
+    print("==== STARTING SYNTHETIC DATA EXPERIMENT ====")
+
+    prefix = (
+        f"{data_dict['task_prompt']} "
+        f"{data_dict['answer_format']}\n\n"
+    )
+    generation_length = data_dict["generation_length"]
+    answer_format = data_dict["answer_format"]
+    task_prompt = data_dict["task_prompt"]
+    eval_questions = data_dict["eval_questions"]
+    eval_targets = data_dict["eval_targets"]
+    output_dir = data_dict["output_dir"]
+    task_name = "synthetic_dyck_languages"
+
+    correct_examples = data_dict["correct_examples"]
+    print(f"[synthetic data] Number of correct examples: {len(correct_examples)}")
+
+    dataset_filename = os.path.join(data_dict["output_dir"], f"{task_name}_ttt_dataset.json")
+
+    create_ttt_dataset( # create the actual data to be used in training
+        prefix=prefix,
+        correct_examples=correct_examples,
+        num_training_steps=num_training_steps,
+        dataset_filename=dataset_filename,
+        shuffle_examples=True
+    )
+
+    config_filename = create_torchtune_config(
+        model_dir=args.model_dir,
+        dataset_type=args.dataset_type,
+        task=task_name,
+        dataset_filename=dataset_filename,
+        output_dir=data_dict["output_dir"],
+        batch_size=args.batch_size,
+        epochs=args.epochs,
+        lr=args.lr,
+        lora_rank=args.lora_rank,
+        lora_alpha=args.lora_alpha,
+        lora_dropout=args.lora_dropout
+    )
+
+    finetune_with_torchtune(config_filename) #fine tune on dataset created above
+
+    gc.collect()
+    torch.cuda.empty_cache()
+
+    llm_eval = LLM(
+        model=args.model_dir,
+        gpu_memory_utilization=0.6,
+        enable_lora=True,
+        max_model_len=8192,
+        max_lora_rank=args.lora_rank,
+        enforce_eager=True
+    )
+
+    prefix = build_inference_prompt(
+        correct_examples,
+        leave_one_out=True,
+        shuffle_examples=True
+    )
+    lora_id = 0
+
+    lora_request = LoRARequest(
+        lora_name=f"{task_name}_adapter_{lora_id}",
+        lora_int_id=lora_id,
+        lora_path=output_dir
+    )
+    lora_id += 1
+
+    eval_outputs = inference_vllm(
+        llm=llm_eval,
+        prompts=eval_questions,
+        max_new_tokens=generation_length,
+        task_prompt=task_prompt,
+        answer_format=answer_format,
+        few_shot_prompt_prefix=prefix,
+        lora_request=lora_request
+    )
+    preds = eval_outputs
+
+    acc = compute_accuracy(preds, eval_targets) # compute accuracy
+    print(f"[synthetic data] Compute accuracy: {acc}")
+
+    gc.collect()
+    torch.cuda.empty_cache()
+
+    print("==== ENDING SYNTHETIC DATA EXPERIMENT ====")
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -408,6 +497,7 @@ def main():
         for task_name, data_dict in task_dict.items():
             if task_name != "dyck_languages":
                 continue
+            generate_data(data_dict, args.num_training_steps, args)
             correct_examples = data_dict["correct_examples"]
             #print(f"correct_examples: {correct_examples}")
             if not correct_examples:
