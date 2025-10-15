@@ -232,6 +232,9 @@ def finetune_with_torchtune(config_filename: str):
 def generate_data(data_dict, num_training_steps, args):
     print("==== STARTING SYNTHETIC DATA EXPERIMENT ====")
 
+    gc.collect()
+    torch.cuda.empty_cache()
+
     prefix = (
         f"{data_dict['task_prompt']} "
         f"{data_dict['answer_format']}\n\n"
@@ -290,7 +293,7 @@ def generate_data(data_dict, num_training_steps, args):
         leave_one_out=True,
         shuffle_examples=True
     )
-    lora_id = 0
+    lora_id = 1
 
     lora_request = LoRARequest(
         lora_name=f"{task_name}_adapter_{lora_id}",
@@ -313,6 +316,7 @@ def generate_data(data_dict, num_training_steps, args):
     acc = compute_accuracy(preds, eval_targets) # compute accuracy
     print(f"[synthetic data] Compute accuracy: {acc}")
 
+    del llm_eval
     gc.collect()
     torch.cuda.empty_cache()
 
